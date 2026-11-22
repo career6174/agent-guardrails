@@ -1,0 +1,23 @@
+{
+  "verdicts": 1675,
+  "deliverables": 713,
+  "first_verdict": {
+    "conditional": 354,
+    "reject": 158,
+    "incomplete": 180,
+    "pass": 21
+  },
+  "last_verdict": {
+    "incomplete": 149,
+    "conditional": 382,
+    "reject": 115,
+    "pass": 67
+  },
+  "flagged_on_first_review": 512,
+  "flagged_on_first_review_pct": 71.8,
+  "clean_on_first_review": 21,
+  "first_rejected": 158,
+  "first_rejected_no_longer_rejected": 73,
+  "review_rounds_median": 2,
+  "review_rounds_mean": 2.35
+}

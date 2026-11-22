@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {"matcher": "Bash", "hooks": [{"type": "command", "command": "python3 ~/.claude/agent-guardrails/hooks/safe_delete_guard.py"}]},
+      {"matcher": "*", "hooks": [{"type": "command", "command": "python3 ~/.claude/agent-guardrails/hooks/repeat_guard.py"}]}
+    ],
+    "Stop": [
+      {"hooks": [{"type": "command", "command": "python3 ~/.claude/agent-guardrails/hooks/review_gate.py"}]}
+    ]
+  }
+}

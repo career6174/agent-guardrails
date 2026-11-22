@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 212" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">
+<rect width="860" height="212" rx="10" fill="#ffffff"/>
+<text x="30" y="34" font-size="17" font-weight="600" fill="#1f2933">First independent review of 713 deliverables the agent was ready to hand over</text>
+<rect x="30.0" y="52" width="397.2" height="46" fill="#d98a1f"/>
+<text x="228.6" y="81" font-size="16" font-weight="600" fill="#ffffff" text-anchor="middle">354</text>
+<rect x="427.2" y="52" width="177.3" height="46" fill="#c0392b"/>
+<text x="515.8" y="81" font-size="16" font-weight="600" fill="#ffffff" text-anchor="middle">158</text>
+<rect x="604.5" y="52" width="202.0" height="46" fill="#9aa3ad"/>
+<text x="705.5" y="81" font-size="16" font-weight="600" fill="#ffffff" text-anchor="middle">180</text>
+<rect x="806.4" y="52" width="23.6" height="46" fill="#2e8b57"/>
+<rect x="30" y="122" width="13" height="13" fill="#d98a1f"/>
+<text x="49" y="133" font-size="13.5" fill="#1f2933">Flagged with conditions · 354 (49.6%)</text>
+<rect x="430" y="122" width="13" height="13" fill="#c0392b"/>
+<text x="449" y="133" font-size="13.5" fill="#1f2933">Rejected · 158 (22.2%)</text>
+<rect x="30" y="146" width="13" height="13" fill="#9aa3ad"/>
+<text x="49" y="157" font-size="13.5" fill="#1f2933">Review did not finish · 180 (25.2%)</text>
+<rect x="430" y="146" width="13" height="13" fill="#2e8b57"/>
+<text x="449" y="157" font-size="13.5" fill="#1f2933">Passed clean · 21 (2.9%)</text>
+<text x="30" y="194" font-size="12.5" fill="#5b6770">30 days, 136 sessions, one deployment. A flag is a reviewer finding, not a confirmed defect. See docs/EVIDENCE.md.</text></svg>
