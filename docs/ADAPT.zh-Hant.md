@@ -56,7 +56,7 @@ AI 助手整出真實損失
 
 | 你嘅情況 | 點做 | 攞到乜 |
 |---|---|---|
-| Claude Code，macOS／Linux／WSL | [README](../README.zh-Hant.md) 最頂嗰一個指令 | 全套 |
+| Claude Code，macOS／Linux／WSL | [README](../README.md#zh-hant) 最頂嗰一個指令 | 全套 |
 | Claude Code，Windows | `git clone` 之後 `python install.py`（見 [INSTALL.md](../INSTALL.md#other-routes)） | 全套 |
 | 唔可以改個人設定（公司電腦） | 喺專案入面跑 `CLAUDE_CONFIG_DIR=./.claude python3 install.py` | 全套，只限嗰個專案 |
 | 設定由公司統一管，攔截器鎖死 | 請管理員加 [INSTALL.md](../INSTALL.md#manual-install) 嗰三項；未批之前先用第 3 節 | 即刻有守則同審查，批咗先有攔截 |
