@@ -22,6 +22,11 @@ STATE_DIR = Path(os.environ.get("REVIEW_GATE_DIR", Path.home() / ".cache" / "age
 WRITE_TOOLS = {"Write", "Edit", "MultiEdit", "NotebookEdit"}
 
 
+def _is_reviewer(agent: object) -> bool:
+    """Match "reviewer" and the name it gets when this repo is installed as a plugin."""
+    return agent in (REVIEWER, "agent-guardrails:" + REVIEWER)
+
+
 def needs_review(lines: list[dict]) -> tuple[list[str], int]:
     """Return (deliverable paths written after the last reviewer run, number of reviewer runs)."""
     pending: list[str] = []
@@ -37,7 +42,7 @@ def needs_review(lines: list[dict]) -> tuple[list[str], int]:
             path = inp.get("file_path") or inp.get("notebook_path") or ""
             if name in WRITE_TOOLS and DELIVERABLE.search(path):
                 pending.append(path)
-            elif name in ("Agent", "Task") and inp.get("subagent_type") == REVIEWER:
+            elif name in ("Agent", "Task") and _is_reviewer(inp.get("subagent_type")):
                 pending.clear()
                 reviews += 1
     return sorted(set(pending)), reviews

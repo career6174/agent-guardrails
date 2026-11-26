@@ -6,6 +6,14 @@
 
 呢套嘢嚟自幾個月日夜運行 Claude Code 助手嘅經驗。喺嗰個環境入面，助手準備交出嘅 713 份成果，有 **72%** 第一次審就被獨立審查員指出最少一個問題；以全部 713 份計，有 22% 直接被拒（[證據同限制](docs/EVIDENCE.md)）。
 
+## 一個指令裝好
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/career6174/agent-guardrails/main/install.sh | bash
+```
+
+佢會將呢個 repo 下載去你 Claude Code 設定資料夾隔籬，登記 3 個攔截器，抄 2 個子助手過去，最後即場示範一次攔截畀你睇。改 `settings.json` 之前會先備份；跑兩次都唔會重複；`--uninstall` 可以成套拆走。[其他安裝方法](#安裝三條路) · [冇辦法成套搬？](#如果冇辦法成套搬過去)
+
 ## 1. 遇到乜問題
 
 AI 助手可以自己改檔、跑指令，做嘢好快，但下面幾種錯會重複出現。
@@ -22,14 +30,20 @@ AI 助手可以自己改檔、跑指令，做嘢好快，但下面幾種錯會�
 
 ## 2. 我哋嘅解決方法
 
-喺助手「落手」嘅位置放死規則，再搵第二個助手喺人見到成果之前核對一次。
+上面每一種錯，我哋都順序問三條問題。
+
+1. **程式驗唔驗得到？** 驗得到就唔好靠模型記住。喺助手落手嗰一下放一個檢查（用工具之前，或者講「做完」嗰一刻）。
+2. **程式驗唔到，第二個助手驗唔驗得到？** 畀佢睇成果本身，唔係作者點形容個成果，再要佢逐項攞證據。
+3. **個檢查自己錯咗點算？** 佢要識讓路。困住用家嘅攔截器，衰過冇攔截器。
+
+所以：喺助手「落手」嘅位置放死規則，再搵第二個助手喺人見到成果之前核對一次。
 
 | 層 | 做乜 | 檔案 |
 |---|---|---|
 | **攔住危險動作** | 擋永久刪除同改寫歷史；擋住一模一樣嘅重試 | `hooks/safe_delete_guard.py`、`hooks/repeat_guard.py` |
 | **攔住「做完」兩個字** | 成果未經審查，助手收唔到工；審完再改，要再審 | `hooks/review_gate.py` |
-| **獨立審查** | 另一個助手逐項核對：每個講法都要有證據（檔案第幾行、指令、畫面） | `templates/agents/reviewer.md` |
-| **先搵現成方案** | 開工前先查有冇人做過 | `templates/agents/scout.md` |
+| **獨立審查** | 另一個助手逐項核對：每個講法都要有證據（檔案第幾行、指令、畫面） | `agents/reviewer.md` |
+| **先搵現成方案** | 開工前先查有冇人做過 | `agents/scout.md` |
 | **工作守則** | 14 條，每條寫明點解要有、點樣強制執行 | `docs/PLAYBOOK.md` |
 | **指令檔同記憶佈局** | 一份短嘅常駐規則，加分層記憶 | `templates/CLAUDE.md`、`templates/memory/` |
 
@@ -75,8 +89,47 @@ AI 助手可以自己改檔、跑指令，做嘢好快，但下面幾種錯會�
 
 呢啲攔截器擋嘅係 AI 助手「唔小心」打出嚟嘅危險指令，唔係安全邊界；有人刻意繞過係擋唔到嘅。
 
-## 安裝
+## 安裝：三條路
 
-見 [English README](README.md#install-claude-code)。
+三揀**一**，裝到嘅嘢一樣。
+
+| 路 | 指令 | 啱邊種人 |
+|---|---|---|
+| **A. 終端機**（macOS、Linux、WSL、Git Bash） | `curl -fsSL https://raw.githubusercontent.com/career6174/agent-guardrails/main/install.sh \| bash` | 想一分鐘內用得 |
+| **B. 叫你個助手裝** | 喺 Claude Code 貼：`Install agent-guardrails for me. Follow https://raw.githubusercontent.com/career6174/agent-guardrails/main/INSTALL.md and show me each command before you run it.` | 想睇住助手做，或者部機設定比較特別 |
+| **C. Claude Code 外掛** | `claude plugin marketplace add career6174/agent-guardrails && claude plugin install agent-guardrails@agent-guardrails` | 樣樣都用外掛管；更新同移除都經 `/plugin` |
+
+Windows 命令提示字元（PowerShell 版見 [INSTALL.md](INSTALL.md#other-routes)）：`git clone https://github.com/career6174/agent-guardrails "%USERPROFILE%\.claude\agent-guardrails" && python "%USERPROFILE%\.claude\agent-guardrails\install.py"`
+
+A 同 B 兩條路會改你部機以下四樣嘢。
+
+| 步驟 | 做乜 | 安全措施 |
+|---|---|---|
+| 下載 | 將 repo 放去 `~/.claude/agent-guardrails` | 唔會再下載其他嘢，零依賴 |
+| 攔截器 | 喺 `~/.claude/settings.json` 加 3 項 | 先備份舊檔；你原有嘅攔截器同設定唔郁；個檔格式有錯就停手唔寫 |
+| 子助手 | 抄 `reviewer.md`、`scout.md` 去 `~/.claude/agents/` | 你已經有同名檔就保留你嗰個；拆走時只刪安裝程式自己建立嘅檔 |
+| 證明 | 餵一個假嘅危險指令畀刪檔攔截，你會見到佢被擋 | 唔會真係刪任何嘢 |
+
+```bash
+python3 ~/.claude/agent-guardrails/install.py --dry-run     # 預覽，乜都唔寫
+python3 ~/.claude/agent-guardrails/install.py --doctor      # 檢查裝成點
+python3 ~/.claude/agent-guardrails/install.py --uninstall   # 拆走裝過嘅嘢
+```
+
+裝完重開 Claude Code。詳細步驟、人手安裝同常見問題見 [INSTALL.md](INSTALL.md)（英文）。
+
+需要 Python 3.10 或以上同 git，另外 Claude Code 要支援攔截器同子助手。自動測試會喺 Linux、macOS、Windows 三個系統各跑一次單元測試，再實際裝一次、重裝、自檢同拆走。指示檔唔會幫你裝，因為嗰份應該由你自己寫：由 [`templates/CLAUDE.md`](templates/CLAUDE.md) 開始改。
+
+## 如果冇辦法成套搬過去
+
+可能公司統一管設定，可能你用緊第二款 AI 助手，可能你自己嘅攔截器會撞，又或者你只想要其中一件。無論邊種，個諗法照樣搬得走。[docs/ADAPT.zh-Hant.md](docs/ADAPT.zh-Hant.md) 一步一步講成個思路，每種情況都有一條路。
+
+| 你嘅情況 | 點做 |
+|---|---|
+| 唔可以改個人設定 | 只裝落一個專案：`CLAUDE_CONFIG_DIR=./.claude python3 install.py` |
+| 只想要一個攔截器 | 喺 `hooks/` 抄一個檔，設定加一項（[範例](INSTALL.md#manual-install)） |
+| 用第二款 AI 助手 | 檢查係純 Python 函數、子助手係純 Markdown：[照住搬](docs/ADAPT.zh-Hant.md#4-搬去第二款-ai-助手) |
+| 個工具完全冇攔截功能 | 將守則同審查員提示當文字用；效果弱啲，文檔有講弱幾多 |
+| 想自己整攔截器 | 跟呢個 repo 用嘅[五步做法](docs/ADAPT.zh-Hant.md#5-五步整你自己嘅攔截器) |
 
 MIT License。

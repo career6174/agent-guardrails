@@ -1,0 +1,11 @@
+{
+  "name": "agent-guardrails",
+  "version": "1.1.0",
+  "description": "Three hooks and two subagents that stop destructive deletes, identical retries, and unreviewed \"done\".",
+  "author": {
+    "name": "career6174"
+  },
+  "homepage": "https://github.com/career6174/agent-guardrails",
+  "repository": "https://github.com/career6174/agent-guardrails",
+  "license": "MIT"
+}

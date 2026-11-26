@@ -1,0 +1,16 @@
+{
+  "name": "agent-guardrails",
+  "owner": {
+    "name": "career6174"
+  },
+  "plugins": [
+    {
+      "name": "agent-guardrails",
+      "source": "./",
+      "description": "Guardrails for AI coding agents: safe delete, repeat guard, review gate."
+    }
+  ],
+  "metadata": {
+    "description": "agent-guardrails: hooks and subagents that make AI coding agents safer to trust."
+  }
+}

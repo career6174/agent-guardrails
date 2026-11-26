@@ -58,6 +58,26 @@ def _transcript(d, blocks):
 
 WRITE = {"type": "tool_use", "name": "Write", "input": {"file_path": "report.html"}}
 REVIEW = {"type": "tool_use", "name": "Agent", "input": {"subagent_type": "reviewer"}}
+PLUGIN_REVIEW = {"type": "tool_use", "name": "Agent", "input": {"subagent_type": "agent-guardrails:reviewer"}}
+OTHER_AGENT = {"type": "tool_use", "name": "Agent", "input": {"subagent_type": "other-plugin:reviewer"}}
+
+
+def test_review_gate_accepts_plugin_prefixed_reviewer_only():
+    with tempfile.TemporaryDirectory() as d:
+        ok = run("review_gate.py", {"transcript_path": _transcript(d, [WRITE, PLUGIN_REVIEW]), "session_id": "p1"},
+                 {"REVIEW_GATE_DIR": d})
+        assert ok[1] == ""
+        blocked = run("review_gate.py", {"transcript_path": _transcript(d, [WRITE, OTHER_AGENT]), "session_id": "p2"},
+                      {"REVIEW_GATE_DIR": d})
+        assert "block" in blocked[1]
+
+
+def test_repeat_guard_works_without_fcntl():
+    with tempfile.TemporaryDirectory() as d:
+        (Path(d) / "fcntl.py").write_text("raise ImportError('no fcntl here')\n")
+        env = {"REPEAT_GUARD_DIR": d, "PYTHONPATH": d}
+        res = [run("repeat_guard.py", bash("curl y"), env) for _ in range(5)]
+        assert "Repeat #3" in res[2][1] and res[4][0] == 2
 
 
 def test_review_gate_blocks_unreviewed_deliverable():

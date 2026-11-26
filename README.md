@@ -20,6 +20,14 @@ flowchart LR
     E -- yes --> G[Delivered to the human]
 ```
 
+## Install in one command
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/career6174/agent-guardrails/main/install.sh | bash
+```
+
+It downloads this repo next to your Claude Code config, registers the three hooks, copies the two subagents, and ends by showing you a live block. Your `settings.json` is backed up first, running it twice changes nothing, and `--uninstall` takes it all out again. [Other ways to install](#install-three-routes) · [Cannot install it as it is?](#if-you-cannot-install-it-whole)
+
 ## 1. The problem
 
 Agents that can edit files and run commands are productive, and they fail in a few predictable ways:
@@ -36,14 +44,20 @@ Telling the model to be careful does not fix this. A prompt is advice, and advic
 
 ## 2. The solution
 
-Put deterministic checks where the agent touches the world, and make a second agent verify the result before a human sees it.
+The thinking, in three questions asked of every failure in the table above:
+
+1. **Can a program detect it?** Then do not ask the model to remember. Put a check at the exact point where the agent acts (before a tool call, or at the moment it says "done").
+2. **If a program cannot, can a second agent?** Give it the result, not the author's opinion of the result, and make it show evidence for every claim.
+3. **What happens when the check itself is wrong?** It must step aside. A guard that traps the user is worse than no guard.
+
+So: put deterministic checks where the agent touches the world, and make a second agent verify the result before a human sees it.
 
 | Layer | What it does | In this repo |
 |---|---|---|
 | **Guard the tool call** | Block destructive deletes and history rewrites; stop identical retries | [`hooks/safe_delete_guard.py`](hooks/safe_delete_guard.py), [`hooks/repeat_guard.py`](hooks/repeat_guard.py) |
 | **Gate the word "done"** | The agent cannot finish while a deliverable is unreviewed; editing after review re-arms the gate | [`hooks/review_gate.py`](hooks/review_gate.py) |
-| **Independent review** | A separate subagent must match every claim to evidence: a path and line, a command, a rendered page | [`templates/agents/reviewer.md`](templates/agents/reviewer.md) |
-| **Prior art first** | A read-only scout checks whether the thing already exists before anything is built | [`templates/agents/scout.md`](templates/agents/scout.md) |
+| **Independent review** | A separate subagent must match every claim to evidence: a path and line, a command, a rendered page | [`agents/reviewer.md`](agents/reviewer.md) |
+| **Prior art first** | A read-only scout checks whether the thing already exists before anything is built | [`agents/scout.md`](agents/scout.md) |
 | **Working rules** | 14 rules, each with the reason it exists and how it is enforced | [`docs/PLAYBOOK.md`](docs/PLAYBOOK.md) |
 | **Instruction file and memory layout** | A short always-loaded rule file and a layered memory that does not rot | [`templates/CLAUDE.md`](templates/CLAUDE.md), [`templates/memory/`](templates/memory/README.md) |
 
@@ -85,16 +99,48 @@ Round 1 started from green tests. The author's tests only covered what the autho
 
 **Read the limits before quoting these numbers:** a flag is a reviewer finding, not a confirmed defect (the false-positive rate has not been measured); there is no control group; the reviewer is also a model; one user, one month. Method, recompute script and caveats are in [docs/EVIDENCE.md](docs/EVIDENCE.md).
 
-## Install (Claude Code)
+## Install: three routes
+
+Pick **one**. All three give you the same hooks and subagents.
+
+| Route | Command | Best when |
+|---|---|---|
+| **A. Terminal** (macOS, Linux, WSL, Git Bash) | `curl -fsSL https://raw.githubusercontent.com/career6174/agent-guardrails/main/install.sh \| bash` | You want it working in a minute |
+| **B. Ask your agent** | Paste into Claude Code: `Install agent-guardrails for me. Follow https://raw.githubusercontent.com/career6174/agent-guardrails/main/INSTALL.md and show me each command before you run it.` | You would rather watch the agent do it, or your setup is unusual |
+| **C. Claude Code plugin** | `claude plugin marketplace add career6174/agent-guardrails && claude plugin install agent-guardrails@agent-guardrails` | You manage everything as plugins; update and removal go through `/plugin` |
+
+Windows Command Prompt (PowerShell version in [INSTALL.md](INSTALL.md#other-routes)): `git clone https://github.com/career6174/agent-guardrails "%USERPROFILE%\.claude\agent-guardrails" && python "%USERPROFILE%\.claude\agent-guardrails\install.py"`
+
+What route A and B change on your machine:
+
+| Step | What happens | Safety |
+|---|---|---|
+| Download | Repo is cloned to `~/.claude/agent-guardrails` | Nothing else is fetched; no dependencies |
+| Hooks | Three entries are added to `~/.claude/settings.json` | Old file is backed up first; your other hooks and settings are untouched; invalid JSON makes it stop without writing |
+| Subagents | `reviewer.md` and `scout.md` are copied to `~/.claude/agents/` | If you already have a file with that name, yours is kept; uninstall removes only files it created |
+| Proof | A pretend dangerous command is fed to the delete guard and you see it blocked | Nothing real is deleted |
 
 ```bash
-git clone https://github.com/career6174/agent-guardrails ~/.claude/agent-guardrails
-mkdir -p ~/.claude/agents
-cp ~/.claude/agent-guardrails/templates/agents/*.md ~/.claude/agents/
-# then merge examples/settings.json into ~/.claude/settings.json
+python3 ~/.claude/agent-guardrails/install.py --dry-run     # preview, write nothing
+python3 ~/.claude/agent-guardrails/install.py --doctor      # check an install
+python3 ~/.claude/agent-guardrails/install.py --uninstall   # remove what was added
 ```
 
-Requires Linux or macOS (the repeat guard uses `fcntl`), Python 3.10+ and a Claude Code version with hooks and subagents. The block message suggests `trash-put`, which comes from `trash-cli`.
+Then restart Claude Code. Details, manual steps and troubleshooting: [INSTALL.md](INSTALL.md).
+
+Requires Python 3.10+, git, and a Claude Code version with hooks and subagents. CI runs the unit tests and a full install, re-install, check and uninstall on Linux, macOS and Windows. The block message suggests `trash-put`, which comes from `trash-cli`. The instruction file is not installed for you, because it is yours to write: start from [`templates/CLAUDE.md`](templates/CLAUDE.md).
+
+## If you cannot install it whole
+
+Company-managed settings, a different agent tool, hooks of your own that clash, or you only want one piece: the ideas still transfer. [docs/ADAPT.md](docs/ADAPT.md) explains the thinking step by step and gives a route for each situation.
+
+| Your situation | What to do |
+|---|---|
+| You may not change your user settings | Install into one project only: `CLAUDE_CONFIG_DIR=./.claude python3 install.py` |
+| You want one guard, not all three | Copy one file from `hooks/` and add one entry to your settings ([snippets](INSTALL.md#manual-install)) |
+| You use another agent tool | The checks are plain Python functions and the subagents are plain Markdown; [port them](docs/ADAPT.md#4-porting-to-another-agent-tool) |
+| Your tool has no hooks at all | Use the rules and the reviewer prompt as text; weaker, and the guide says how much |
+| You want to build your own guards | Follow the [five-step recipe](docs/ADAPT.md#5-build-your-own-guard-in-five-steps) this repo was built with |
 
 ## Configure
 

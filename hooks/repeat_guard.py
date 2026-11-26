@@ -6,13 +6,17 @@ warning; on the (N+2)th it blocks. Any file edit (Write/Edit/...) resets the his
 normal "edit code -> rerun the same test command" loop is never counted as a repeat.
 Read-only tools (Read, Grep, Glob, ...) are never counted, because re-reading a file is normal. Any internal error fails open (exit 0).
 """
-import fcntl
 import hashlib
 import json
 import os
 import re
 import sys
 from pathlib import Path
+
+try:
+    import fcntl
+except ImportError:  # Windows: no flock; a rare lost update only delays a warning
+    fcntl = None
 
 def _int_env(name: str, default: int) -> int:
     try:
@@ -39,7 +43,8 @@ def record(session: str, fp: str | None) -> int:
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     safe = re.sub(r"[^A-Za-z0-9_-]", "_", session)[:64] or "default"
     with open(STATE_DIR / f"repeat-{safe}.json", "a+") as fh:
-        fcntl.flock(fh, fcntl.LOCK_EX)
+        if fcntl:
+            fcntl.flock(fh, fcntl.LOCK_EX)
         fh.seek(0)
         try:
             history = json.loads(fh.read() or "[]")

@@ -8,7 +8,7 @@ Every rule has the same shape: **the rule, why it exists, and how it is enforced
 
 - **Rule.** Nothing is reported as finished until a reviewer that did not write it has opened the actual output: the file, the diff, the test log, the rendered page. Summaries, exit code 0 and "it should work" are not evidence.
 - **Why.** Agents report success from their own summary. In the first review of this very repository, the tests were green and the delete guard still missed six common spellings.
-- **Enforced by.** `hooks/review_gate.py` blocks the final answer until the reviewer subagent has run after the last edit. `templates/agents/reviewer.md` forces a "claim → evidence → result" table.
+- **Enforced by.** `hooks/review_gate.py` blocks the final answer until the reviewer subagent has run after the last edit. `agents/reviewer.md` forces a "claim → evidence → result" table.
 
 ## 2. The author does not grade their own work
 
@@ -38,7 +38,7 @@ Every rule has the same shape: **the rule, why it exists, and how it is enforced
 
 - **Rule.** Before writing a new service, workflow or any script that will run for a long time, search what already exists: your own past notes and working examples first, then mature open-source tools. Build only when there is a stated, checkable reason the existing option does not fit.
 - **Why.** Agents happily rebuild from scratch what already exists two folders away, or what a mature open-source tool does better.
-- **Enforced by.** A read-only "scout" subagent (`templates/agents/scout.md`) whose only job is to answer "has someone already solved this?" and return a compressed verdict.
+- **Enforced by.** A read-only "scout" subagent (`agents/scout.md`) whose only job is to answer "has someone already solved this?" and return a compressed verdict.
 
 ## 7. Changing A must not break B
 
